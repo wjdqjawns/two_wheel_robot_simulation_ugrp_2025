@@ -1,157 +1,156 @@
-# 🧩 Cubli Simulation (MATLAB)
-**A modular simulation framework for the Cubli robot (2D & 3D self-balancing cube).**  
-This project implements the dynamic model, controllers (PID & LQR), and visualization tools for analyzing balance control and stability.  
-It is structured to later integrate with MuJoCo or ROS for 3D physics and real hardware testing.
+# 🦿 Two-Wheel Legged Robot Simulation (MATLAB)
+
+**A dynamic simulation framework inspired by Ascento and Diablo robots.**  
+This project models a two-wheeled legged robot capable of balancing, jumping, and traversing uneven terrain. The simulation is implemented in MATLAB with a modular structure for dynamics, control, and visualization.
+
+## 📘 Overview
+
+The **two-wheel legged robot** combines the agility of wheeled motion with the robustness of legged balance.
+
+This simulator focuses on:
+
+- Rigid-body and spring-leg dynamics  
+- Reaction-wheel or wheel torque control  
+- Balance and posture stabilization (PID / LQR / MPC)  
+- Jump trajectory generation and takeoff simulation  
+- Visualization and data logging
 
 ## 📁 Folder Structure
-
 ```
-matlab/
-├── archive/ # Deprecated or experimental scripts
+simulation/
+├── configs/ # Simulation and controller setup
+│ └── config_ascento.m
 │
-├── configs/ # Simulation and controller configuration
-│ └── simulation_config.m
+├── model/ # Robot dynamics & kinematics
+│ ├── body_dynamics.m
+│ ├── leg_dynamics.m
+│ ├── wheel_dynamics.m
+│ └── robot_model_init.m
 │
-├── experiments/ # Automatically saved results
-│ ├── results/ # simulation output (.mat)
-│ ├── figures/ # plots generated from each run (.png)
-│ ├── logs/ # optional text logs (.csv)
-│ └── model/ # snapshot of simulation parameters (.mat)
+├── controller/ # Control algorithms
+│ ├── PIDController.m
+│ ├── LQRController.m
+│ ├── MPCController.m
+│ └── HybridController.m
 │
-├── src/ # Core source code
-│ ├── main.m # Entry point of simulation
-│ │
-│ ├── controller/ # Control algorithms
-│ │ ├── PIDController.m
-│ │ └── LQRController.m
-│ │
-│ ├── core/ # Simulation engine & loop
-│ │ ├── SimulationManager.m
-│ │ ├── Integrator.m
-│ │ └── DisturbanceManager.m
-│ │
-│ ├── model/ # Dynamic models
-│ │ ├── cubli_model_2d.m
-│ │ └── cubli_model_3d.m
-│ │
-│ ├── utils/ # Common utilities (math, logging)
-│ │ ├── logger.m
-│ │ └── math_utils.m
-│ │
-│ └── visualization/ # Plotting & animation
-│ ├── plotter.m
-│ └── animator.m
+├── simulation/ # Core simulation loop
+│ ├── SimulationManager.m
+│ ├── Integrator.m
+│ ├── DisturbanceModel.m
+│ └── simulate_robot.m
+│
+├── visualization/ # Animation and plots
+│ ├── plot_results.m
+│ ├── animate_robot.m
+│ └── render_3D.m
+│
+├── experiments/ # Auto-saved simulation results
+│ ├── results/
+│ ├── figures/
+│ ├── logs/
+│ └── models/
+│
+├── utils/ # Math, logger, coordinate transforms
+│ ├── logger.m
+│ ├── math_utils.m
+│ └── trajectory_utils.m
 │
 └── README.md
 ```
 
 ## 🚀 How to Run
-
-1. Open MATLAB and navigate to:
-    ```matlab
-    root/simulation/
+1. Open MATLAB and navigate to the project root:
+   ```matlab
+   cd('C:\Users\cbj\Desktop\prj_ugrp\two_wheel_legged_robot_sim\matlab')
     ```
-2. Run:
+2. Run the main simulation:
     ```
     cd src
     main
     ```
-3. The simulation will automatically:
-    - Load configuration from configs/simulation_config.m
-    - Run with either PID or LQR control
-    - Display time-domain response graphs
+3. The simulation will:
+simulation will:
+    - Load parameters from /configs/config_ascento.m
+    - Build the model and controller
+    - Run the dynamic loop with integrated visualization
+
 
 ## ⚙️ Configuration
-
-All simulation parameters (model, controller, duration, step size, etc.) are defined in:
-
+All simulation parameters are centralized in:
 ```
-configs/simulation_config.m
+configs/config_ascento.m
 ```
-
 Example:
-
 ```
-cfg.simulation.dt = 0.001;
-cfg.simulation.duration = 5.0;
-cfg.controller.type = 'PID'; % or 'LQR'
+cfg.sim.dt = 0.001;
+cfg.sim.duration = 10.0;
 
-cfg.controller.PID = struct('Kp',12,'Ki',0,'Kd',1.2);
-cfg.controller.LQR = struct('Q',diag([20,1]),'R',0.5);
+cfg.controller.type = 'LQR';
+cfg.controller.LQR.Q = diag([100, 10, 1, 0.5]);
+cfg.controller.LQR.R = 0.2;
+
+cfg.robot.mass = 6.5;
+cfg.robot.leg_length = 0.25;
+cfg.robot.wheel_radius = 0.06;
+cfg.robot.spring_k = 1200; % optional compliance
 ```
-
-Change the controller type to switch between PID and LQR simulations.
+## 🧱 System Components
+| Component               | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| `SimulationManager`     | Handles time-stepping and controller integration      |
+| `BodyDynamics`          | Computes 6-DOF rigid-body motion of torso             |
+| `WheelDynamics`         | Models motor torque and wheel-ground interaction      |
+| `LegDynamics`           | Simulates spring or rigid leg joint                   |
+| `PID/LQR/MPCController` | Balancing and motion control algorithms               |
+| `Plotter`               | Time-domain visualization of angles, torque, velocity |
+| `Animator`              | 2D/3D animation of robot movement                     |
+| `Logger`                | Saves `.mat`, `.csv`, `.png` files automatically      |
+## 🧠 Control Methods
+| Controller | Description                         | Status        |
+| ---------- | ----------------------------------- | ------------- |
+| PID        | Baseline balance controller         | ✅ Implemented |
+| LQR        | Optimal full-state feedback         | ✅ In progress |
+| MPC        | Predictive control with constraints | ⏳ Planned     |
+| Hybrid     | State machine for jump/walk balance | 🔜 Planned    |
 
 ## 📊 Output
-Simulation results are automatically stored under:
-
+Simulation results are automatically saved under:
 ```
 experiments/
-├── model/   → simulation model (.mat)
-├── figures/   → plots of θ(t), torque(t) (.png)
-└── logs/      → optional simulation logs (.csv)
+├── results/   → simulation data (.mat)
+├── figures/   → generated plots (.png)
+└── logs/      → control and state logs (.csv)
+```
+Example files:
+```
+experiments/results/ascento_balancing_20251028.mat
+experiments/figures/ascento_balancing_20251028.png
+experiments/logs/ascento_balancing_20251028.csv
 ```
 
-Example output files:
-
-```
-experiemtns/model/[simulation condition]_results_[YYYYMMDD].mat
-experiemtns/figures/[simulation condition]_results_[YYYYMMDD].png
-experiemtns/logs/[simulation condition]_results_[YYYYMMDD].csv
-```
-
-## 🧱 Components Overview
-Component | Description
-:-|:-
-SimulationManager |	Central loop that integrates model & controller
-CubliModel2D	| Implements 2D dynamic equations of motion
-PIDController	| Classic feedback control (tunable gains)
-LQRController	| Optimal control minimizing cost function
-Plotter	| Generates time-domain plots
-Animator	| (Future) 2D/3D visual motion of Cubli
-Logger	| Saves results and logs automatically
-## 🧠 Development Roadmap
-Stage	| Focus	| Status
-:-:|:-:|:-:
-Phase 1	| 2D Cubli + PID/LQR simulation	| ✅ In progress
-Phase 2	| Add noise/disturbance models	| ⏳ Next
-Phase 3	| Add Lyapunov stability analysis	| ⏳ Next
-Phase 4	| 3D Cubli dynamics (multi-axis)	| ⏳ Planned
-Phase 5	| Export model to URDF for MuJoCo	| 🔜 Planned
-Phase 6	| Python/ROS control integration | 🔜 Future
-
-## 🧮 Theoretical Background
-The Cubli behaves like an inverted pendulum with a reaction wheel.
-The governing equation (simplified 2D model) is:
-$$J\ddot{\theta}=mgl\sin(\theta)-u$$
-where:
-- $\theta$: cube tilt angle
-- $u$: wheel torque
-- $J$: total moment of inertia
-- $m$: cube mass
-- $l$: distance to center of mass
-
-> **Control goal:**
-> $$\theta \rightarrow 0,\ \hat{\theta}\rightarrow 0$$
-
-## 🧠 Tips for Development
-- Keep all code modular under /src — never modify main.m directly for new experiments.
-- Add new controller types (e.g. RLController.m) without changing the main simulation loop.
-- Save all simulation outputs through a Logger or ExperimentManager for reproducibility.
-- Archive deprecated or draft code in /archive.
+## 🧩 Development Roadmap
+| Phase | Focus                             |     Status    |
+| :---: | :-------------------------------- | :-----------: |
+| **1** | 2D inverted pendulum (wheel-only) |     ✅ Done    |
+| **2** | Add spring-leg dynamics           | ⏳ In progress |
+| **3** | Jump motion simulation            |   ⏳ Planned   |
+| **4** | Nonlinear MPC control             |   🔜 Planned  |
+| **5** | Full 3D model (MuJoCo / Simscape) |   🔜 Future   |
+| **6** | ROS2 + hardware-in-loop testing   |   🔜 Future   |
 
 ## 📚 References
-[1] R. D'Andrea, "The Cubli – A cube that can jump up and balance", IEEE/RSJ IROS, 2012.
+[1] ETH Zurich, Ascento – A Jumping Wheeled Robot, ICRA 2019
 
-[2] Optimized Attitude Control of a CubeSat Using Reaction Wheels and an LQR Controller, Aerospace, 2024.
+[2] Direct Drive Tech, Diablo Robot – Balancing & Jumping Control, 2023
 
-[3] Development of a Nonlinear Mechatronic Cube, 2023.
+[3] R. D’Andrea et al., The Cubli – A cube that can jump up and balance, IROS 2012
+
+[4] O. Khatib, A Unified Approach for Motion and Force Control, IJRR, 1987
 
 ## ✍️ Author Notes
-This MATLAB-based Cubli simulator is designed to bridge:
-- Analytical control design (PID, LQR, Lyapunov)
-- Simulation validation
-- Future integration with physical or MuJoCo-based models
+Developed by Beomjun Jung as part of a research-oriented simulation project. This repository aims to serve as a bridge between analytical control design and real robot implementation.
 
-**The next steps will be:**
-> Adding noise, evaluating stability robustness, and comparing control performance across methods.
+> **Next Steps:**
+>    - Implement full 3D rigid-body dynamics
+>    - Add compliant leg models and jump control
+>    - Integrate with MuJoCo / ROS2 for hardware testing
